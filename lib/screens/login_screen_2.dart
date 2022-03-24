@@ -21,7 +21,7 @@ class LoginPage extends StatelessWidget {
                     height: 150,
                     child: Center(
                       child: Text(
-                        'Foodybite',
+                        'FluentU',
                         style: kHeading,
                       ),
                     ),
