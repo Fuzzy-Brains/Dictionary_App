@@ -1,3 +1,4 @@
+import 'package:dictionary_app/screens/home_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -19,7 +20,7 @@ class _SplashState extends State<Splash> {
 
   _navigatetohome() async {
     await Future.delayed(Duration(milliseconds: 1500),(){});
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>MyHomePage()));
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomeScreen()));
   }
 
   @override
@@ -35,7 +36,7 @@ class _SplashState extends State<Splash> {
               color: Colors.greenAccent,
             ),
             Container(
-              child: Text(
+              child: const Text(
                 'Splash Screen',
                 style:TextStyle(
                     fontSize: 24,
