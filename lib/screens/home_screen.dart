@@ -23,22 +23,23 @@ class _HomeScreenState extends State<HomeScreen> {
   final String _token = '485c8dde628df764c6d8ceecd3deb1c553a58257';
 
   @override
-  initState(){
+  initState() {
     super.initState();
     _streamController = StreamController();
     _stream = _streamController!.stream;
   }
 
-  _onChanged(String text) async{
-    if(text.isEmpty){
+  _onChanged(String text) async {
+    if (text.isEmpty) {
       _streamController!.add(null);
     }
 
     String word = text.toString().trim();
 
-    Response response = await http.get(Uri.parse(_url + word), headers: { 'Authorization': 'Token '+ _token });
+    Response response = await http.get(Uri.parse(_url + word),
+        headers: {'Authorization': 'Token ' + _token});
 
-    if(response.statusCode == 404){
+    if (response.statusCode == 404) {
       _streamController!.add(null);
       return;
     }
@@ -46,22 +47,26 @@ class _HomeScreenState extends State<HomeScreen> {
     _streamController!.add(json.decode(response.body));
   }
 
-  _search() async{
-    if(_controller.text.isEmpty){
+  _search() async {
+    if (_controller.text.isEmpty) {
       _streamController!.add(null);
     }
 
     String word = _controller.text.toString().trim();
 
-    Response response = await http.get(Uri.parse(_url + word), headers: { 'Authorization': 'Token '+ _token });
+    Response response = await http.get(Uri.parse(_url + word),
+        headers: {'Authorization': 'Token ' + _token});
     _streamController!.add(json.decode(response.body));
   }
 
-  List<String> codes = [
-    'EN', 'HI', 'CG'
-  ];
+  List<String> codes = ['SELECT', 'ENGLISH', 'HINDI', 'CHHATTISGARI'];
 
-  String dropdownValue = "EN";
+  var dropdownValue = "ENGLISH";
+
+  print1() {
+    print(dropdownValue);
+    print(_controller.text);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,13 +74,12 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: Color(0xff2c0834),
         elevation: 0,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.menu),
-            Center(
-                child: Text('Dictionary App', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),))
-          ],
+        leading: Icon(Icons.menu),
+        centerTitle: true,
+        title: Text(
+          'Dictionary App',
+          style: TextStyle(
+              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48),
@@ -83,41 +87,55 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Expanded(
                 child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                  margin: const EdgeInsets.symmetric(
+                      horizontal: 12.0, vertical: 8.0),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(24)
-                  ),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24)),
                   child: TextFormField(
                     onChanged: _onChanged,
                     controller: _controller,
                     decoration: const InputDecoration(
-                      hintText: 'Search for a word',
-                      contentPadding: EdgeInsets.only(left: 24),
-                      border: InputBorder.none
-                    ),
+                        hintText: 'Search for a word',
+                        contentPadding: EdgeInsets.only(left: 24),
+                        border: InputBorder.none),
                   ),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(right: 8),
-                  child: IconButton(onPressed: _search, icon: const Icon(Icons.search, color: Colors.white,)))
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Expanded(
+                    flex: 2,
+                    child: Container(
+                        padding: EdgeInsets.only(left: 20),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: Colors.white,
+                        ),
+                        child: DropDown<String>(
+                          showUnderline: false,
+                          dropDownType: DropDownType.Button,
+                          hint: Text('Select Language'),
+                          items: codes,
+                          initialValue: dropdownValue,
+                          onChanged: (language) {
+                            setState(() {
+                              dropdownValue = language!;
+                            });
+                            print1();
+                          },
+                        )),
+                  ))
             ],
           ),
         ),
       ),
       backgroundColor: Colors.white,
       body: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Expanded(flex: 2,child: TextField()),
-            Expanded(flex: 2, child: DropDown(
-              items: codes,
-            ),)
-          ],
-        )
-      ),
+          child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+      )),
       // body: StreamBuilder(
       //   stream: _stream,
       //   builder: (context, AsyncSnapshot snapshot){
