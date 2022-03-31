@@ -36,6 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   font_awesome_flutter: ^10.0.0
   http: ^0.13.4
+  flutter_dropdown: ^1.0.0+hotfix.1
 
 dev_dependencies:
   flutter_test:

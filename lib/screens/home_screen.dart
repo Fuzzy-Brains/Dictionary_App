@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter_dropdown/flutter_dropdown.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:dictionary_app/widgets/app_bar.dart';
@@ -56,14 +57,26 @@ class _HomeScreenState extends State<HomeScreen> {
     _streamController!.add(json.decode(response.body));
   }
 
+  List<String> codes = [
+    'EN', 'HI', 'CG'
+  ];
+
+  String dropdownValue = "EN";
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // backgroundColor: Colors.white,
+        backgroundColor: Color(0xff2c0834),
         elevation: 0,
-        title: const Center(
-            child: Text('Dictionary App', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),)),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.menu),
+            Center(
+                child: Text('Dictionary App', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),))
+          ],
+        ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48),
           child: Row(
@@ -94,40 +107,51 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       backgroundColor: Colors.white,
-      body: StreamBuilder(
-        stream: _stream,
-        builder: (context, AsyncSnapshot snapshot){
-          if(snapshot.data == null){
-            return const Center(
-              child: Text('Enter a valid word to search..'),
-            );
-          }
-
-          return ListView.builder(
-            itemCount: snapshot.data['definitions'].length,
-              itemBuilder: (context, index){
-                return ListBody(
-                  children: [
-                    Container(
-                      color: Colors.grey[300],
-                      child: ListTile(
-                        leading: snapshot.data['definitions'][index]['image_url']==null ? null : CircleAvatar(
-                          backgroundImage: NetworkImage(snapshot.data['definitions'][index]['image_url']),
-                        ),
-                        title: Text(
-                            snapshot.data['word'] + '(${snapshot.data['definitions'][index]['type']})'
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.all(8),
-                        child: Text(snapshot.data['definitions'][index]['definition']))
-                  ],
-                );
-              }
-          );
-        },
+      body: Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(flex: 2,child: TextField()),
+            Expanded(flex: 2, child: DropDown(
+              items: codes,
+            ),)
+          ],
+        )
       ),
+      // body: StreamBuilder(
+      //   stream: _stream,
+      //   builder: (context, AsyncSnapshot snapshot){
+      //     if(snapshot.data == null){
+      //       return const Center(
+      //         child: Text('Enter a valid word to search..'),
+      //       );
+      //     }
+      //
+      //     return ListView.builder(
+      //       itemCount: snapshot.data['definitions'].length,
+      //         itemBuilder: (context, index){
+      //           return ListBody(
+      //             children: [
+      //               Container(
+      //                 color: Colors.grey[300],
+      //                 child: ListTile(
+      //                   leading: snapshot.data['definitions'][index]['image_url']==null ? null : CircleAvatar(
+      //                     backgroundImage: NetworkImage(snapshot.data['definitions'][index]['image_url']),
+      //                   ),
+      //                   title: Text(
+      //                       snapshot.data['word'] + '(${snapshot.data['definitions'][index]['type']})'
+      //                   ),
+      //                 ),
+      //               ),
+      //               Padding(
+      //                 padding: EdgeInsets.all(8),
+      //                   child: Text(snapshot.data['definitions'][index]['definition']))
+      //             ],
+      //           );
+      //         }
+      //     );
+      //   },
+      // ),
     );
   }
 }
