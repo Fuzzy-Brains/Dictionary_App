@@ -22,9 +22,8 @@ class _SplashState extends State<Splash> {
         ),
         Positioned(
           child:SplashScreen(
-            seconds: 30,
+            seconds: 6,
             navigateAfterSeconds: new HomeScreen(),
-            //imageBackground: AssetImage('assets/images/bgmain.jpeg'),
             backgroundColor: Color(0xff2c0834),
             title: new Text('FluentU',textScaleFactor: 3.5,style: TextStyle(fontWeight: FontWeight.bold,color:Colors.white,decorationColor:Colors.white),),
             image: new Image.asset('assets/images/main.gif'),
