@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dictionary_app/constants.dart';
 import 'package:dictionary_app/models/error.dart';
 import 'package:dictionary_app/models/response.dart';
+import 'package:dictionary_app/models/response1.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dropdown/flutter_dropdown.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -23,6 +24,7 @@ class _DashboardViewState extends State<DashboardView> {
   final String APP_ID = '319abc3c';
   final String APP_KEY = '0baf90ac56e59199c756c7bbcce7b08d';
   List<Response> Responses = [];
+  List<Result> Results = [];
 
   _onChanged(String text) async {
     if (text.isEmpty) {
@@ -44,14 +46,28 @@ class _DashboardViewState extends State<DashboardView> {
   }
 
    Map<String, String> languageCodes = {
-    'ENGLISH' : 'en', 'HINDI' : 'hi'
+    'ENGLISH' : 'en', 'HINDI' : 'hi', 'CHHATTISGARI' : 'rg'
   };
 
   submit() async{
     String? code = languageCodes[dropdownValue];
     String word = _controller.text.toString().trim();
+    switch(code){
+      case 'en':
+        english(word, code!);
+        break;
+      case 'hi':
+        hindi(word, code!);
+        break;
+      case 'rg':
+        regional(word, code!);
+        break;
+    }
+  }
+
+  english(String word, String code) async{
     var response = await http.get(
-      Uri.parse(BASE_URL + code! +  '/' + word),
+      Uri.parse(BASE_URL + code +  '/' + word),
     );
 
     // print(jsonDecode(response.body));
@@ -66,6 +82,7 @@ class _DashboardViewState extends State<DashboardView> {
 
       setState(() {
         Responses = Responses1;
+        Results.clear();
       });
       // for(Response r in Responses){
       //   print(r.toJson());
@@ -75,9 +92,56 @@ class _DashboardViewState extends State<DashboardView> {
       if(response.statusCode==404){
         setState(() {
           Responses.clear();
+          Results.clear();
         });
       }
     }
+  }
+
+  hindi(String word, String code) async{
+    var response = await http.post(
+        Uri.parse('https://dictionary-api-fuzzy-brains.herokuapp.com/api/fetchDefinitionByWord'),
+        body: {
+          'word': word,
+          'languageCode': code
+        }
+    );
+
+    // print(response.body);
+    List responses = jsonDecode(response.body)['result'];
+    List<Result> Results1 = [];
+    for(var x in responses){
+      Result r= Result.fromJson(x);
+      Results1.add(r);
+    }
+
+    setState(() {
+      Results = Results1;
+      Responses.clear();
+    });
+  }
+
+  regional(String word, String code) async{
+    var response = await http.post(
+      Uri.parse('https://dictionary-api-fuzzy-brains.herokuapp.com/api/fetchDefinitionByWord'),
+      body: {
+        'word': word,
+        'languageCode': code
+      }
+    );
+
+    // print(response.body);
+    List responses = jsonDecode(response.body)['result'];
+    List<Result> Results1 = [];
+    for(var x in responses){
+      Result r= Result.fromJson(x);
+      Results1.add(r);
+    }
+
+    setState(() {
+      Results = Results1;
+      Responses.clear();
+    });
   }
 
   @override
@@ -173,13 +237,20 @@ class _DashboardViewState extends State<DashboardView> {
           ),
 
           SizedBox(height: 24,),
-          Responses.isEmpty ? Center(
+          Responses.isEmpty && Results.isEmpty ? Center(
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 12),
               child: Text('Please enter a valid word to search.',
                 style: GoogleFonts.lato(fontSize: 20, fontStyle: FontStyle.italic,
-                                    color: primaryColor, fontWeight: FontWeight.bold),),
+                    color: primaryColor, fontWeight: FontWeight.bold),),
             ),
+          ) : (Responses.isEmpty) ? ListView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemBuilder: (c, i){
+              return ListTileWidget2(listItem: Results[i],);
+            },
+            itemCount: Results.length,
           ) : ListView.builder(
             shrinkWrap: true,
             physics: NeverScrollableScrollPhysics(),
@@ -222,3 +293,30 @@ class _ListTileWidgetState extends State<ListTileWidget> {
   }
 }
 
+class ListTileWidget2 extends StatefulWidget {
+  final Result listItem;
+  const ListTileWidget2({Key? key, required this.listItem}) : super(key: key);
+
+  @override
+  _ListTileWidget2State createState() => _ListTileWidget2State();
+}
+
+class _ListTileWidget2State extends State<ListTileWidget2> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      // height: 300,
+      color: Color(0xFFF3F3F3),
+      child: ListTile(
+        title: Text(widget.listItem.word, style: GoogleFonts.lato(fontSize: 36, fontWeight: FontWeight.bold,
+            fontStyle: FontStyle.italic, color: Colors.black ),),
+        trailing: Text(widget.listItem.partOfSpeech, style: GoogleFonts.lato(fontSize: 22,
+            fontStyle: FontStyle.italic, color: Colors.black ),),
+        subtitle: Text(widget.listItem.definition, style: GoogleFonts.lato(fontSize: 20,
+            fontStyle: FontStyle.italic, color: Colors.black ),),
+      ),
+    );
+  }
+}

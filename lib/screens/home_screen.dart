@@ -7,6 +7,7 @@ import 'package:dictionary_app/screens/dictionary_view.dart';
 import 'package:dictionary_app/screens/notification_view.dart';
 import 'package:dictionary_app/screens/profile_view.dart';
 import 'package:flutter_dropdown/flutter_dropdown.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_remix_icons/flutter_remix_icons.dart';
 import 'package:dictionary_app/widgets/app_bar.dart';
@@ -23,6 +24,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   PageController pageController = PageController();
   int _bottomNavIndex = 0;
+  String _title = 'Home';
+
   List<IconData> icons = [
     RemixIcons.home2Fill,
     RemixIcons.bookOpenFill,
@@ -63,9 +66,10 @@ class _HomeScreenState extends State<HomeScreen> {
         gapLocation: GapLocation.center,
         notchSmoothness: NotchSmoothness.smoothEdge,
         onTap: (index){
-          setState(() {
-            _bottomNavIndex = index;
-          });
+          // setState(() {
+          //   _bottomNavIndex = index;
+          // });
+          _onPageChanged(index);
           pageController.jumpToPage(_bottomNavIndex);
         },
       ),
@@ -75,18 +79,17 @@ class _HomeScreenState extends State<HomeScreen> {
         // leading: Icon(Icons.menu),
         centerTitle: true,
         title: Text(
-          'Dictionary App',
-          style: TextStyle(
-              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+          _title,
+          style: GoogleFonts.lato(fontStyle: FontStyle.italic,
+              fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ),
       backgroundColor: Colors.white,
       body: PageView(
-        physics: NeverScrollableScrollPhysics(),
+        scrollDirection: Axis.horizontal,
+        // physics: NeverScrollableScrollPhysics(),
         controller: pageController,
-        onPageChanged: (val){
-          setState(() => _bottomNavIndex = val);
-        },
+        onPageChanged: _onPageChanged,
         children: [
           DashboardView(),
           DictionaryView(),
@@ -95,5 +98,27 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+  }
+
+  _onPageChanged(val){
+    String tempTitle = "";
+    switch(val){
+      case 0:
+        tempTitle = 'Home';
+        break;
+      case 1:
+        tempTitle = 'Words';
+        break;
+      case 2:
+        tempTitle = 'Notifications';
+        break;
+      case 3:
+        tempTitle = 'About Us';
+        break;
+    }
+    setState(() {
+      _bottomNavIndex = val;
+      _title = tempTitle;
+    });
   }
 }
