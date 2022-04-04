@@ -1,6 +1,7 @@
 import 'package:dictionary_app/screens/home_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:splashscreen/splashscreen.dart';
 
 import 'home.dart';
@@ -25,7 +26,8 @@ class _SplashState extends State<Splash> {
             seconds: 6,
             navigateAfterSeconds: new HomeScreen(),
             backgroundColor: Color(0xff2c0834),
-            title: new Text('FluentU',textScaleFactor: 3.5,style: TextStyle(fontWeight: FontWeight.bold,color:Colors.white,decorationColor:Colors.white),),
+            title: new Text('FluentU',textScaleFactor: 2.5,style: GoogleFonts.lato(fontSize: 20,
+                fontStyle: FontStyle.italic, color: Colors.white ),),
             image: new Image.asset('assets/images/main.gif'),
             loadingText: Text("Loading",style: TextStyle(color: Colors.white),),
             photoSize: 100.0,
