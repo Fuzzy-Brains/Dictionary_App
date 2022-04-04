@@ -113,7 +113,35 @@ class _ProfileViewState extends State<ProfileView> {
                     );
                   },
                   itemCount: developers.length,
-                )
+                ),
+
+                SizedBox(height: 22,),
+                Container(
+                  child: Text(
+                    'If you know any word(s) which is missing in our database, please do help us by sending us an email'
+                        ' containing the word(s) , their part of speech, language they are used in and their meaning.'
+                        'Also share your feedback to us.'
+                        'We would love to hear your feedback.',
+                    style:  GoogleFonts.lato(fontSize: 18,
+                        fontStyle: FontStyle.italic, color: Colors.black ),
+                    textAlign: TextAlign.center,
+                  ), ),
+
+                SizedBox(height: 16,),
+                MaterialButton(
+                  onPressed: (){
+                    launch('mailto://singh.yuvraj1047@gmail.com');
+                  },
+                  child: Container(
+                    child: Text(
+                      'Our Email',
+                      style:  GoogleFonts.lato(fontSize: 20, fontWeight: FontWeight.bold,
+                          fontStyle: FontStyle.italic, color: Colors.blue,  ),
+                      textAlign: TextAlign.center,
+                    ), ),
+                ),
+
+
 
               ],
             ),
