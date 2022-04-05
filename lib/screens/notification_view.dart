@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart';
 
+import '../constants.dart';
+
 class NotificationView extends StatefulWidget {
   const NotificationView({Key? key}) : super(key: key);
 
@@ -16,10 +18,11 @@ class NotificationView extends StatefulWidget {
 
 class _NotificationViewState extends State<NotificationView> {
 
-  String _word = 'word';
-  String _definition = 'definition';
-  String _language = 'language';
-  String _partOfSpeech = 'noun';
+  // String _word = 'word';
+  String _english = 'english';
+  String _hindi = 'hindi';
+  String _chhattisgarhi = 'chhattisgarhi';
+  bool _loading = true;
 
   @override
   void initState() {
@@ -33,21 +36,22 @@ class _NotificationViewState extends State<NotificationView> {
 
     List responses = jsonDecode(response.body)['result'];
 
-    List<Result> results = [];
+    List<Response1> results = [];
     for(var x in responses){
-      Result r= Result.fromJson(x);
+      Response1 r= Response1.fromJson(x);
       results.add(r);
     }
 
-    Random random = Random.secure();
+    Random random = Random();
     int index = random.nextInt(results.length);
 
-    Result result = results[index];
+    Response1 result = results[index];
     setState(() {
-      _word = result.word;
-      _partOfSpeech = result.partOfSpeech;
-      _definition = result.definition;
-      _language = result.languageCode;
+      _english = result.english;
+      _hindi = result.hindi;
+      _chhattisgarhi = result.chhattisgarhi;
+      _loading = false;
+      // _language = result.languageCode;
     });
   }
 
@@ -62,27 +66,46 @@ class _NotificationViewState extends State<NotificationView> {
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             color: Color(0xFFF3F3F3),
             // height: 200,
-            child: Column(
+            child: _loading ? Center(
+                child: Column(
+                  children: [
+                    Text('Loading..Please wait...', style: GoogleFonts.lato(fontSize: 17,
+                        fontWeight: FontWeight.bold, color: primaryColor ),),
+                    SizedBox(height: 8,),
+                    CircularProgressIndicator(color: primaryColor,)
+                  ],
+                ),
+            ) :  Column(
               children: [
-                Text('Word of the Day', style: GoogleFonts.lato(fontSize: 36, fontWeight: FontWeight.bold,
+                Text('Word of the Day', style: GoogleFonts.lato(fontSize: 30, fontWeight: FontWeight.bold,
                     fontStyle: FontStyle.italic, color: Colors.black ),),
-                SizedBox(height: 14,),
+                SizedBox(height: 20,),
                 ListTile(
-                  title: Row(
-                    children: [
-                      Text(_word, style: GoogleFonts.lato(fontSize: 30, fontWeight: FontWeight.bold,
-                          fontStyle: FontStyle.italic, color: Colors.black ),),
-                      SizedBox(width: 16,),
-                      AutoSizeText('($_language)', style: GoogleFonts.lato(fontSize: 18,
-                           color: Colors.black ), maxLines: 2,)
-                    ],
-                  ),
-                  trailing: Text(_partOfSpeech, style: GoogleFonts.lato(fontSize: 22,
+                  title: Text('Description of the word', style:
+                  GoogleFonts.lato(fontSize: 24, fontWeight: FontWeight.bold,
                       fontStyle: FontStyle.italic, color: Colors.black ),),
-                  subtitle: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(_definition, style: GoogleFonts.lato(fontSize: 20,
-                        fontStyle: FontStyle.italic, color: Colors.black ),),
+
+                  subtitle: Column(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: Text('English (en) : $_english',
+                          style: GoogleFonts.lato(fontSize: 20,
+                              fontStyle: FontStyle.italic, color: Colors.black ),),
+                      ),
+                      Container(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: Text('Hindi (hi) : $_hindi',
+                          style: GoogleFonts.lato(fontSize: 20,
+                              fontStyle: FontStyle.italic, color: Colors.black ),),
+                      ),
+                      Container(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: Text('Chhattisgarhi (cg) : $_chhattisgarhi',
+                          style: GoogleFonts.lato(fontSize: 20,
+                              fontStyle: FontStyle.italic, color: Colors.black ),),
+                      ),
+                    ],
                   ),
                 ),
               ],

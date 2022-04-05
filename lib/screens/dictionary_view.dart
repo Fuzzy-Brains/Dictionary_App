@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:dictionary_app/models/word.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dialogs/flutter_dialogs.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../constants.dart';
@@ -17,6 +18,7 @@ class DictionaryView extends StatefulWidget {
 class _DictionaryViewState extends State<DictionaryView> {
   final TextEditingController _controller = TextEditingController();
   List<Word> Words = [];
+  bool _loading = false;
 
   submit() async{
     String keywords = _controller.text.toString().replaceAll(' ', '+');
@@ -28,14 +30,41 @@ class _DictionaryViewState extends State<DictionaryView> {
 
     List responses = jsonDecode(res.body);
     List<Word> words = [];
+    words.add(Word(
+        word: 'Related words based on your search', score: 0
+    ));
     for(var x in responses){
       Word w = Word.fromJson(x);
       words.add(w);
     }
+    if(words.length ==1){
+      words.clear();
+    }
 
     setState(() {
       Words = words;
+      _loading = false;
     });
+
+    if(Words.isEmpty){
+      showPlatformDialog(context: context,
+          builder: (context) => BasicDialogAlert(
+            title: Text('Words Not Found.', style: GoogleFonts.lato(
+                fontWeight: FontWeight.bold, fontSize: 22, color: primaryColor),),
+            content: Text(
+              'No related words found.!!', style: GoogleFonts.lato(fontSize: 18),
+            ),
+            actions: [
+              BasicDialogAction(
+                title: Text('OK', style: GoogleFonts.lato(fontSize: 18, color: primaryColor,
+                    fontWeight: FontWeight.bold),),
+                onPressed: (){
+                  Navigator.pop(context);
+                },
+              )
+            ],
+          ));
+    }
 
     // for(Word w in Words){
     //   print(w.toJson());
@@ -80,6 +109,9 @@ class _DictionaryViewState extends State<DictionaryView> {
                 ),
                 SizedBox(height: 14,),
                 MaterialButton(onPressed: (){
+                  setState(() {
+                    _loading = true;
+                  });
                   submit();
                 },
                   child: Container(
@@ -98,7 +130,16 @@ class _DictionaryViewState extends State<DictionaryView> {
               ],
             ),
           ),
-          ListView.builder(
+          _loading ? Center(
+            child: Column(
+              children: [
+                Text('Searching..Please wait...', style: GoogleFonts.lato(fontSize: 17,
+                    fontWeight: FontWeight.bold, color: primaryColor ),),
+                SizedBox(height: 8,),
+                CircularProgressIndicator(color: primaryColor,)
+              ],
+            ),
+          ) : ListView.builder(
             shrinkWrap: true,
             physics: NeverScrollableScrollPhysics(),
             itemBuilder: (c,i){
@@ -129,10 +170,10 @@ class _ListTileWidgetState extends State<ListTileWidget> {
       // height: 300,
       color: Color(0xFFF3F3F3),
       child: ListTile(
-        title: Text(widget.listItem.word, style: GoogleFonts.lato(fontSize: 30, fontWeight: FontWeight.bold,
+        title: Text(widget.listItem.word, style: GoogleFonts.lato(fontSize: 24, fontWeight: FontWeight.bold,
             fontStyle: FontStyle.italic, color: Colors.black ),),
-        trailing: Text('Score : ${widget.listItem.score.toInt()}', style: GoogleFonts.lato(fontSize: 18,
-            fontStyle: FontStyle.italic, color: Colors.black ),),
+        // trailing: Text('Score : ${widget.listItem.score.toInt()}', style: GoogleFonts.lato(fontSize: 18,
+        //     fontStyle: FontStyle.italic, color: Colors.black ),),
         // subtitle: Text(widget.listItem.meanings[0].definitions[0].definition, style: GoogleFonts.lato(fontSize: 20,
         //     fontStyle: FontStyle.italic, color: Colors.black ),),
       ),

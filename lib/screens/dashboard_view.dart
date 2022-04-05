@@ -5,6 +5,7 @@ import 'package:dictionary_app/models/error.dart';
 import 'package:dictionary_app/models/response.dart';
 import 'package:dictionary_app/models/response1.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dialogs/flutter_dialogs.dart';
 import 'package:flutter_dropdown/flutter_dropdown.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -24,7 +25,8 @@ class _DashboardViewState extends State<DashboardView> {
   final String APP_ID = '319abc3c';
   final String APP_KEY = '0baf90ac56e59199c756c7bbcce7b08d';
   List<Response> Responses = [];
-  List<Result> Results = [];
+  List<Response1> Results = [];
+  bool _loading = false;
 
   _onChanged(String text) async {
     if (text.isEmpty) {
@@ -52,6 +54,9 @@ class _DashboardViewState extends State<DashboardView> {
   submit() async{
     String? code = languageCodes[dropdownValue];
     String word = _controller.text.toString().trim();
+
+    word = word.toLowerCase();
+
     switch(code){
       case 'en':
         english(word, code!);
@@ -82,18 +87,50 @@ class _DashboardViewState extends State<DashboardView> {
 
       setState(() {
         Responses = Responses1;
+        _loading = false;
         Results.clear();
       });
       // for(Response r in Responses){
       //   print(r.toJson());
       // }
     }catch(e){
-      ErrorResponse errorResponse = ErrorResponse.fromJson(jsonDecode(response.body));
-      if(response.statusCode==404){
+      try{
+        ErrorResponse errorResponse = ErrorResponse.fromJson(jsonDecode(response.body));
+        if(response.statusCode==404){
+          setState(() {
+            Responses.clear();
+            _loading = false;
+            Results.clear();
+          });
+        }
+      }catch(e){
         setState(() {
           Responses.clear();
+          _loading = false;
           Results.clear();
         });
+      }
+
+      if(Responses.isEmpty && Results.isEmpty){
+        showPlatformDialog(context: context,
+            builder: (context) => BasicDialogAlert(
+              title: Text('Word Not Found.', style: GoogleFonts.lato(
+                  fontWeight: FontWeight.bold, fontSize: 22, color: primaryColor),),
+              content: Text(
+                'Sorry, the word you entered cannot be found in our database. '
+                    'But We are constantly adding data to our database. Please help us by sending an email to us '
+                    'about the details of this word.', style: GoogleFonts.lato(fontSize: 18),
+              ),
+              actions: [
+                BasicDialogAction(
+                  title: Text('OK', style: GoogleFonts.lato(fontSize: 18, color: primaryColor,
+                      fontWeight: FontWeight.bold),),
+                  onPressed: (){
+                    Navigator.pop(context);
+                  },
+                )
+              ],
+            ));
       }
     }
   }
@@ -109,16 +146,39 @@ class _DashboardViewState extends State<DashboardView> {
 
     // print(response.body);
     List responses = jsonDecode(response.body)['result'];
-    List<Result> Results1 = [];
+    List<Response1> Results1 = [];
     for(var x in responses){
-      Result r= Result.fromJson(x);
+      Response1 r= Response1.fromJson(x);
       Results1.add(r);
     }
 
     setState(() {
       Results = Results1;
+      _loading = false;
       Responses.clear();
     });
+
+    if(Responses.isEmpty && Results.isEmpty){
+      showPlatformDialog(context: context,
+          builder: (context) => BasicDialogAlert(
+            title: Text('Word Not Found.', style: GoogleFonts.lato(
+                fontWeight: FontWeight.bold, fontSize: 22, color: primaryColor),),
+            content: Text(
+              'Sorry, the word you entered cannot be found in our database. '
+                  'But We are constantly adding data to our database. Please help us by sending an email to us '
+                  'about the details of this word.', style: GoogleFonts.lato(fontSize: 18),
+            ),
+            actions: [
+              BasicDialogAction(
+                title: Text('OK', style: GoogleFonts.lato(fontSize: 18, color: primaryColor,
+                    fontWeight: FontWeight.bold),),
+                onPressed: (){
+                  Navigator.pop(context);
+                },
+              )
+            ],
+          ));
+    }
   }
 
   regional(String word, String code) async{
@@ -132,16 +192,39 @@ class _DashboardViewState extends State<DashboardView> {
 
     // print(response.body);
     List responses = jsonDecode(response.body)['result'];
-    List<Result> Results1 = [];
+    List<Response1> Results1 = [];
     for(var x in responses){
-      Result r= Result.fromJson(x);
+      Response1 r= Response1.fromJson(x);
       Results1.add(r);
     }
 
     setState(() {
       Results = Results1;
+      _loading = false;
       Responses.clear();
     });
+
+    if(Responses.isEmpty && Results.isEmpty){
+      showPlatformDialog(context: context,
+          builder: (context) => BasicDialogAlert(
+            title: Text('Word Not Found.', style: GoogleFonts.lato(
+                fontWeight: FontWeight.bold, fontSize: 22, color: primaryColor),),
+            content: Text(
+              'Sorry, the word you entered cannot be found in our database. '
+                  'But We are constantly adding data to our database. Please help us by sending an email to us '
+                  'about the details of this word.', style: GoogleFonts.lato(fontSize: 18),
+            ),
+            actions: [
+              BasicDialogAction(
+                title: Text('OK', style: GoogleFonts.lato(fontSize: 18, color: primaryColor,
+                    fontWeight: FontWeight.bold),),
+                onPressed: (){
+                  Navigator.pop(context);
+                },
+              )
+            ],
+          ));
+    }
   }
 
   @override
@@ -217,6 +300,9 @@ class _DashboardViewState extends State<DashboardView> {
                 ),
                 SizedBox(height: 14,),
                 MaterialButton(onPressed: (){
+                  setState(() {
+                    _loading = true;
+                  });
                   submit();
                 },
                   child: Container(
@@ -237,7 +323,16 @@ class _DashboardViewState extends State<DashboardView> {
           ),
 
           SizedBox(height: 24,),
-          Responses.isEmpty && Results.isEmpty ? Center(
+          _loading ? Center(
+            child: Column(
+              children: [
+                Text('Searching..Please wait...', style: GoogleFonts.lato(fontSize: 17,
+                    fontWeight: FontWeight.bold, color: primaryColor ),),
+                SizedBox(height: 8,),
+                CircularProgressIndicator(color: primaryColor,)
+              ],
+            ),
+          ) : Responses.isEmpty && Results.isEmpty ? Center(
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 12),
               child: Text('Please enter a valid word to search.',
@@ -294,7 +389,7 @@ class _ListTileWidgetState extends State<ListTileWidget> {
 }
 
 class ListTileWidget2 extends StatefulWidget {
-  final Result listItem;
+  final Response1 listItem;
   const ListTileWidget2({Key? key, required this.listItem}) : super(key: key);
 
   @override
@@ -309,13 +404,40 @@ class _ListTileWidget2State extends State<ListTileWidget2> {
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       // height: 300,
       color: Color(0xFFF3F3F3),
+      // child: ListTile(
+      //   title: Text(widget.listItem.english, style: GoogleFonts.lato(fontSize: 36, fontWeight: FontWeight.bold,
+      //       fontStyle: FontStyle.italic, color: Colors.black ),),
+      //   trailing: Text(widget.listItem.hindi, style: GoogleFonts.lato(fontSize: 22,
+      //       fontStyle: FontStyle.italic, color: Colors.black ),),
+      //   subtitle: Text(widget.listItem.chhattisgarhi, style: GoogleFonts.lato(fontSize: 20,
+      //       fontStyle: FontStyle.italic, color: Colors.black ),),
+      // ),
+
       child: ListTile(
-        title: Text(widget.listItem.word, style: GoogleFonts.lato(fontSize: 36, fontWeight: FontWeight.bold,
+        title: Text('Description of the word', style: GoogleFonts.lato(fontSize: 24, fontWeight: FontWeight.bold,
             fontStyle: FontStyle.italic, color: Colors.black ),),
-        trailing: Text(widget.listItem.partOfSpeech, style: GoogleFonts.lato(fontSize: 22,
-            fontStyle: FontStyle.italic, color: Colors.black ),),
-        subtitle: Text(widget.listItem.definition, style: GoogleFonts.lato(fontSize: 20,
-            fontStyle: FontStyle.italic, color: Colors.black ),),
+        subtitle: Column(
+          children: [
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: Text('English (en) : ${widget.listItem.english}',
+                style: GoogleFonts.lato(fontSize: 20,
+                  fontStyle: FontStyle.italic, color: Colors.black ),),
+            ),
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: Text('Hindi (hi) : ${widget.listItem.hindi}',
+                style: GoogleFonts.lato(fontSize: 20,
+                    fontStyle: FontStyle.italic, color: Colors.black ),),
+            ),
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: Text('Chhattisgarhi (cg) : ${widget.listItem.chhattisgarhi}',
+                style: GoogleFonts.lato(fontSize: 20,
+                    fontStyle: FontStyle.italic, color: Colors.black ),),
+            ),
+          ],
+        ),
       ),
     );
   }
