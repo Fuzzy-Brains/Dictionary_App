@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
+import 'package:data_connection_checker/data_connection_checker.dart';
+import 'package:dictionary_app/InternetChecker.dart';
 import 'package:dictionary_app/constants.dart';
 import 'package:dictionary_app/screens/dashboard_view.dart';
 import 'package:dictionary_app/screens/dictionary_view.dart';
@@ -42,8 +44,16 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   initState() {
     super.initState();
-    _streamController = StreamController();
-    _stream = _streamController!.stream;
+    // _streamController = StreamController();
+    // _stream = _streamController!.stream;
+    InternetChecker().checkConnection(context);
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    InternetChecker().listener.cancel();
   }
 
   @override

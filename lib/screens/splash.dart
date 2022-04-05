@@ -23,7 +23,7 @@ class _SplashState extends State<Splash> {
         ),
         Positioned(
           child:SplashScreen(
-            seconds: 6,
+            seconds: 5,
             navigateAfterSeconds: new HomeScreen(),
             backgroundColor: Color(0xff2c0834),
             title: new Text('FluentU',textScaleFactor: 2.5,style: GoogleFonts.lato(fontSize: 20,

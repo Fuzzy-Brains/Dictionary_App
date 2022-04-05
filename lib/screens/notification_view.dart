@@ -2,12 +2,15 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:dictionary_app/backend.dart';
 import 'package:dictionary_app/models/response1.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart';
 
+import '../InternetChecker.dart';
 import '../constants.dart';
+import '../models/response2.dart';
 
 class NotificationView extends StatefulWidget {
   const NotificationView({Key? key}) : super(key: key);
@@ -19,16 +22,20 @@ class NotificationView extends StatefulWidget {
 class _NotificationViewState extends State<NotificationView> {
 
   // String _word = 'word';
-  String _english = 'english';
-  String _hindi = 'hindi';
-  String _chhattisgarhi = 'chhattisgarhi';
+  Response2? response2;
   bool _loading = true;
 
   @override
-  void initState() {
-    // TODO: implement initState
+  initState() {
     super.initState();
-    init();
+    InternetChecker().checkConnection(context);
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    InternetChecker().listener.cancel();
   }
 
   init() async{
@@ -46,10 +53,10 @@ class _NotificationViewState extends State<NotificationView> {
     int index = random.nextInt(results.length);
 
     Response1 result = results[index];
+
+    Response2? res = await apiCall(result.english, 'en');
     setState(() {
-      _english = result.english;
-      _hindi = result.hindi;
-      _chhattisgarhi = result.chhattisgarhi;
+      response2 = res;
       _loading = false;
       // _language = result.languageCode;
     });
@@ -75,6 +82,13 @@ class _NotificationViewState extends State<NotificationView> {
                     CircularProgressIndicator(color: primaryColor,)
                   ],
                 ),
+            ) : response2==null ? Center(
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                child: Text('Something went wrong. Please try again later.',
+                  style: GoogleFonts.lato(fontSize: 20, fontStyle: FontStyle.italic,
+                      color: primaryColor, fontWeight: FontWeight.bold),),
+              ),
             ) :  Column(
               children: [
                 Text('Word of the Day', style: GoogleFonts.lato(fontSize: 30, fontWeight: FontWeight.bold,
@@ -89,19 +103,31 @@ class _NotificationViewState extends State<NotificationView> {
                     children: [
                       Container(
                         padding: EdgeInsets.symmetric(vertical: 8),
-                        child: Text('English (en) : $_english',
+                        child: Text('English (en) : ${response2!.english}',
                           style: GoogleFonts.lato(fontSize: 20,
                               fontStyle: FontStyle.italic, color: Colors.black ),),
                       ),
                       Container(
                         padding: EdgeInsets.symmetric(vertical: 8),
-                        child: Text('Hindi (hi) : $_hindi',
+                        child: Text('Hindi (hi) : ${response2!.hindi}',
                           style: GoogleFonts.lato(fontSize: 20,
                               fontStyle: FontStyle.italic, color: Colors.black ),),
                       ),
                       Container(
                         padding: EdgeInsets.symmetric(vertical: 8),
-                        child: Text('Chhattisgarhi (cg) : $_chhattisgarhi',
+                        child: Text('Chhattisgarhi (cg) : ${response2!.chhattisgarhi}',
+                          style: GoogleFonts.lato(fontSize: 20,
+                              fontStyle: FontStyle.italic, color: Colors.black ),),
+                      ),
+                      Container(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: Text('Part of speech : ${response2!.partOfSpeech}',
+                          style: GoogleFonts.lato(fontSize: 20,
+                              fontStyle: FontStyle.italic, color: Colors.black ),),
+                      ),
+                      Container(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: Text('Meaning : ${response2!.meaning}',
                           style: GoogleFonts.lato(fontSize: 20,
                               fontStyle: FontStyle.italic, color: Colors.black ),),
                       ),

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dialogs/flutter_dialogs.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../InternetChecker.dart';
 import '../constants.dart';
 import 'package:http/http.dart' as http;
 
@@ -19,6 +20,19 @@ class _DictionaryViewState extends State<DictionaryView> {
   final TextEditingController _controller = TextEditingController();
   List<Word> Words = [];
   bool _loading = false;
+
+  @override
+  initState() {
+    super.initState();
+    InternetChecker().checkConnection(context);
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    InternetChecker().listener.cancel();
+  }
 
   submit() async{
     String keywords = _controller.text.toString().replaceAll(' ', '+');

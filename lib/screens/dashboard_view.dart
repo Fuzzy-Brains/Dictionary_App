@@ -1,14 +1,19 @@
 import 'dart:convert';
 
+import 'package:dictionary_app/backend.dart';
 import 'package:dictionary_app/constants.dart';
 import 'package:dictionary_app/models/error.dart';
 import 'package:dictionary_app/models/response.dart';
 import 'package:dictionary_app/models/response1.dart';
+import 'package:dictionary_app/models/response2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dialogs/flutter_dialogs.dart';
 import 'package:flutter_dropdown/flutter_dropdown.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+
+import '../models/response2.dart';
+import '../models/response2.dart';
 
 class DashboardView extends StatefulWidget {
   const DashboardView({Key? key}) : super(key: key);
@@ -24,8 +29,7 @@ class _DashboardViewState extends State<DashboardView> {
   final String BASE_URL = 'https://api.dictionaryapi.dev/api/v2/entries/';
   final String APP_ID = '319abc3c';
   final String APP_KEY = '0baf90ac56e59199c756c7bbcce7b08d';
-  List<Response> Responses = [];
-  List<Response1> Results = [];
+  Response2? response2;
   bool _loading = false;
 
   _onChanged(String text) async {
@@ -57,108 +61,82 @@ class _DashboardViewState extends State<DashboardView> {
 
     word = word.toLowerCase();
 
-    switch(code){
-      case 'en':
-        english(word, code!);
-        break;
-      case 'hi':
-        hindi(word, code!);
-        break;
-      case 'rg':
-        regional(word, code!);
-        break;
-    }
+    call(word, code!);
   }
 
-  english(String word, String code) async{
-    var response = await http.get(
-      Uri.parse(BASE_URL + code +  '/' + word),
-    );
+  // english(String word, String code) async{
+  //   var response = await http.get(
+  //     Uri.parse(BASE_URL + code +  '/' + word),
+  //   );
+  //
+  //   // print(jsonDecode(response.body));
+  //
+  //   try{
+  //     List responses = jsonDecode(response.body);
+  //     List<Response> Responses1 = [];
+  //     for(var x in responses){
+  //       Response r = Response.fromJson(x);
+  //       Responses1.add(r);
+  //     }
+  //
+  //     setState(() {
+  //       Responses = Responses1;
+  //       _loading = false;
+  //       Results.clear();
+  //     });
+  //     // for(Response r in Responses){
+  //     //   print(r.toJson());
+  //     // }
+  //   }catch(e){
+  //     try{
+  //       ErrorResponse errorResponse = ErrorResponse.fromJson(jsonDecode(response.body));
+  //       if(response.statusCode==404){
+  //         setState(() {
+  //           Responses.clear();
+  //           _loading = false;
+  //           Results.clear();
+  //         });
+  //       }
+  //     }catch(e){
+  //       setState(() {
+  //         Responses.clear();
+  //         _loading = false;
+  //         Results.clear();
+  //       });
+  //     }
+  //
+  //     if(Responses.isEmpty && Results.isEmpty){
+  //       showPlatformDialog(context: context,
+  //           builder: (context) => BasicDialogAlert(
+  //             title: Text('Word Not Found.', style: GoogleFonts.lato(
+  //                 fontWeight: FontWeight.bold, fontSize: 22, color: primaryColor),),
+  //             content: Text(
+  //               'Sorry, the word you entered cannot be found in our database. '
+  //                   'But We are constantly adding data to our database. Please help us by sending an email to us '
+  //                   'about the details of this word.', style: GoogleFonts.lato(fontSize: 18),
+  //             ),
+  //             actions: [
+  //               BasicDialogAction(
+  //                 title: Text('OK', style: GoogleFonts.lato(fontSize: 18, color: primaryColor,
+  //                     fontWeight: FontWeight.bold),),
+  //                 onPressed: (){
+  //                   Navigator.pop(context);
+  //                 },
+  //               )
+  //             ],
+  //           ));
+  //     }
+  //   }
+  // }
 
-    // print(jsonDecode(response.body));
-
-    try{
-      List responses = jsonDecode(response.body);
-      List<Response> Responses1 = [];
-      for(var x in responses){
-        Response r = Response.fromJson(x);
-        Responses1.add(r);
-      }
-
-      setState(() {
-        Responses = Responses1;
-        _loading = false;
-        Results.clear();
-      });
-      // for(Response r in Responses){
-      //   print(r.toJson());
-      // }
-    }catch(e){
-      try{
-        ErrorResponse errorResponse = ErrorResponse.fromJson(jsonDecode(response.body));
-        if(response.statusCode==404){
-          setState(() {
-            Responses.clear();
-            _loading = false;
-            Results.clear();
-          });
-        }
-      }catch(e){
-        setState(() {
-          Responses.clear();
-          _loading = false;
-          Results.clear();
-        });
-      }
-
-      if(Responses.isEmpty && Results.isEmpty){
-        showPlatformDialog(context: context,
-            builder: (context) => BasicDialogAlert(
-              title: Text('Word Not Found.', style: GoogleFonts.lato(
-                  fontWeight: FontWeight.bold, fontSize: 22, color: primaryColor),),
-              content: Text(
-                'Sorry, the word you entered cannot be found in our database. '
-                    'But We are constantly adding data to our database. Please help us by sending an email to us '
-                    'about the details of this word.', style: GoogleFonts.lato(fontSize: 18),
-              ),
-              actions: [
-                BasicDialogAction(
-                  title: Text('OK', style: GoogleFonts.lato(fontSize: 18, color: primaryColor,
-                      fontWeight: FontWeight.bold),),
-                  onPressed: (){
-                    Navigator.pop(context);
-                  },
-                )
-              ],
-            ));
-      }
-    }
-  }
-
-  hindi(String word, String code) async{
-    var response = await http.post(
-        Uri.parse('https://dictionary-api-fuzzy-brains.herokuapp.com/api/fetchDefinitionByWord'),
-        body: {
-          'word': word,
-          'languageCode': code
-        }
-    );
-
-    // print(response.body);
-    List responses = jsonDecode(response.body)['result'];
-    List<Response1> Results1 = [];
-    for(var x in responses){
-      Response1 r= Response1.fromJson(x);
-      Results1.add(r);
-    }
-
+  call(String word, String code) async{
+    Response2? res = await apiCall(word, code);
     setState(() {
-      Results = Results1;
+      response2 = res;
       _loading = false;
-      Responses.clear();
     });
 
-    if(Responses.isEmpty && Results.isEmpty){
+    if(response2 == null){
       showPlatformDialog(context: context,
           builder: (context) => BasicDialogAlert(
             title: Text('Word Not Found.', style: GoogleFonts.lato(
@@ -181,51 +159,33 @@ class _DashboardViewState extends State<DashboardView> {
     }
   }
 
-  regional(String word, String code) async{
-    var response = await http.post(
-      Uri.parse('https://dictionary-api-fuzzy-brains.herokuapp.com/api/fetchDefinitionByWord'),
-      body: {
-        'word': word,
-        'languageCode': code
-      }
-    );
-
-    // print(response.body);
-    List responses = jsonDecode(response.body)['result'];
-    List<Response1> Results1 = [];
-    for(var x in responses){
-      Response1 r= Response1.fromJson(x);
-      Results1.add(r);
-    }
-
-    setState(() {
-      Results = Results1;
-      _loading = false;
-      Responses.clear();
-    });
-
-    if(Responses.isEmpty && Results.isEmpty){
-      showPlatformDialog(context: context,
-          builder: (context) => BasicDialogAlert(
-            title: Text('Word Not Found.', style: GoogleFonts.lato(
-                fontWeight: FontWeight.bold, fontSize: 22, color: primaryColor),),
-            content: Text(
-              'Sorry, the word you entered cannot be found in our database. '
-                  'But We are constantly adding data to our database. Please help us by sending an email to us '
-                  'about the details of this word.', style: GoogleFonts.lato(fontSize: 18),
-            ),
-            actions: [
-              BasicDialogAction(
-                title: Text('OK', style: GoogleFonts.lato(fontSize: 18, color: primaryColor,
-                    fontWeight: FontWeight.bold),),
-                onPressed: (){
-                  Navigator.pop(context);
-                },
-              )
-            ],
-          ));
-    }
-  }
+  // regional(String word, String code) async{
+  //   var response = await http.post(
+  //     Uri.parse('https://dictionary-api-fuzzy-brains.herokuapp.com/api/fetchDefinitionByWord'),
+  //     body: {
+  //       'word': word,
+  //       'languageCode': code
+  //     }
+  //   );
+  //
+  //   // print(response.body);
+  //   List responses = jsonDecode(response.body)['result'];
+  //   List<Response1> Results1 = [];
+  //   for(var x in responses){
+  //     Response1 r= Response1.fromJson(x);
+  //     Results1.add(r);
+  //   }
+  //
+  //   setState(() {
+  //     Results = Results1;
+  //     _loading = false;
+  //     Responses.clear();
+  //   });
+  //
+  //   if(Responses.isEmpty && Results.isEmpty){
+  //
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -332,28 +292,14 @@ class _DashboardViewState extends State<DashboardView> {
                 CircularProgressIndicator(color: primaryColor,)
               ],
             ),
-          ) : Responses.isEmpty && Results.isEmpty ? Center(
+          ) : response2==null ? Center(
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 12),
               child: Text('Please enter a valid word to search.',
                 style: GoogleFonts.lato(fontSize: 20, fontStyle: FontStyle.italic,
                     color: primaryColor, fontWeight: FontWeight.bold),),
             ),
-          ) : (Responses.isEmpty) ? ListView.builder(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemBuilder: (c, i){
-              return ListTileWidget2(listItem: Results[i],);
-            },
-            itemCount: Results.length,
-          ) : ListView.builder(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemBuilder: (c, i){
-              return ListTileWidget(listItem: Responses[i],);
-            },
-            itemCount: Responses.length,
-          )
+          ) : ListTileWidget2(listItem: response2!)
         ],
       ),
     );
@@ -389,7 +335,7 @@ class _ListTileWidgetState extends State<ListTileWidget> {
 }
 
 class ListTileWidget2 extends StatefulWidget {
-  final Response1 listItem;
+  final Response2 listItem;
   const ListTileWidget2({Key? key, required this.listItem}) : super(key: key);
 
   @override
@@ -433,6 +379,18 @@ class _ListTileWidget2State extends State<ListTileWidget2> {
             Container(
               padding: EdgeInsets.symmetric(vertical: 8),
               child: Text('Chhattisgarhi (cg) : ${widget.listItem.chhattisgarhi}',
+                style: GoogleFonts.lato(fontSize: 20,
+                    fontStyle: FontStyle.italic, color: Colors.black ),),
+            ),
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: Text('Part of speech : ${widget.listItem.partOfSpeech}',
+                style: GoogleFonts.lato(fontSize: 20,
+                    fontStyle: FontStyle.italic, color: Colors.black ),),
+            ),
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: Text('Meaning : ${widget.listItem.meaning}',
                 style: GoogleFonts.lato(fontSize: 20,
                     fontStyle: FontStyle.italic, color: Colors.black ),),
             ),

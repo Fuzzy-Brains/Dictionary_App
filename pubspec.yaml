@@ -44,6 +44,8 @@ dependencies:
   auto_size_text: ^3.0.0
   url_launcher: ^6.0.20
   flutter_dialogs: ^2.1.1
+  data_connection_checker: ^0.3.4
+  open_settings: ^2.0.2
 
 dev_dependencies:
   flutter_test:
