@@ -120,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
         tempTitle = 'Words';
         break;
       case 2:
-        tempTitle = 'Notifications';
+        tempTitle = 'Word of the day';
         break;
       case 3:
         tempTitle = 'About Us';

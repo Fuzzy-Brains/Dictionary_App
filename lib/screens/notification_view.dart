@@ -4,12 +4,16 @@ import 'dart:math';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:dictionary_app/backend.dart';
 import 'package:dictionary_app/models/response1.dart';
+import 'package:dictionary_app/models/response.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 
 import '../InternetChecker.dart';
 import '../constants.dart';
+import '../models/response.dart';
+import '../models/response.dart';
+import '../models/response.dart';
 import '../models/response2.dart';
 
 class NotificationView extends StatefulWidget {
@@ -22,44 +26,75 @@ class NotificationView extends StatefulWidget {
 class _NotificationViewState extends State<NotificationView> {
 
   // String _word = 'word';
-  Response2? response2;
+  Response2? Result;
   bool _loading = true;
 
   @override
   initState() {
     super.initState();
-    InternetChecker().checkConnection(context);
+    init();
+    // InternetChecker().checkConnection(context);
   }
 
   @override
   void dispose() {
     // TODO: implement dispose
     super.dispose();
-    InternetChecker().listener.cancel();
+    // InternetChecker().listener.cancel();
   }
 
   init() async{
-    var response = await get(Uri.parse('https://dictionary-api-fuzzy-brains.herokuapp.com/api/getAllWords'));
-
+    var response = await http.get(Uri.parse('https://dictionary-api-fuzzy-brains.herokuapp.com/api/getRandomWord'));
+    print(response);
     List responses = jsonDecode(response.body)['result'];
+    print(responses);
 
-    List<Response1> results = [];
-    for(var x in responses){
-      Response1 r= Response1.fromJson(x);
-      results.add(r);
+    Response1 result = Response1.fromJson(responses[0]);
+    print(result.toJson());
+
+    Response2? res;
+
+    var response2 = await http.get(
+      Uri.parse(BASE_URL + 'en' +  '/' + result.english),
+    );
+
+    try{
+      List responseFromApi2 = jsonDecode(response2.body);
+      List<Response> responseList2 = [];
+      for(var x in responseFromApi2){
+        Response r = Response.fromJson(x);
+        responseList2.add(r);
+      }
+
+      Response r = responseList2[0];
+      res = Response2(
+          english: result.english, hindi: result.hindi, chhattisgarhi: result.chhattisgarhi,
+          partOfSpeech: r.meanings[0].partOfSpeech, meaning: r.meanings[0].definitions[0].definition);
+
+      // setState(() {
+      //   Responses = Responses1;
+      //   Responses2 = responses2;
+      //   _loading = false;
+      //   Results.clear();
+      // });
+    }catch(e){
+      res = Response2(
+          english: result.english, hindi: result.hindi, chhattisgarhi: result.chhattisgarhi,
+          partOfSpeech: '', meaning: '');
     }
 
-    Random random = Random();
-    int index = random.nextInt(results.length);
-
-    Response1 result = results[index];
-
-    Response2? res = await apiCall(result.english, 'en');
     setState(() {
-      response2 = res;
       _loading = false;
+      Result = res;
       // _language = result.languageCode;
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant NotificationView oldWidget) {
+    // TODO: implement didUpdateWidget
+    super.didUpdateWidget(oldWidget);
+
   }
 
   @override
@@ -82,7 +117,7 @@ class _NotificationViewState extends State<NotificationView> {
                     CircularProgressIndicator(color: primaryColor,)
                   ],
                 ),
-            ) : response2==null ? Center(
+            ) : Result==null ? Center(
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 12),
                 child: Text('Something went wrong. Please try again later.',
@@ -103,31 +138,31 @@ class _NotificationViewState extends State<NotificationView> {
                     children: [
                       Container(
                         padding: EdgeInsets.symmetric(vertical: 8),
-                        child: Text('English (en) : ${response2!.english}',
+                        child: Text('English (en) : ${Result!.english}',
                           style: GoogleFonts.lato(fontSize: 20,
                               fontStyle: FontStyle.italic, color: Colors.black ),),
                       ),
                       Container(
                         padding: EdgeInsets.symmetric(vertical: 8),
-                        child: Text('Hindi (hi) : ${response2!.hindi}',
+                        child: Text('Hindi (hi) : ${Result!.hindi}',
                           style: GoogleFonts.lato(fontSize: 20,
                               fontStyle: FontStyle.italic, color: Colors.black ),),
                       ),
                       Container(
                         padding: EdgeInsets.symmetric(vertical: 8),
-                        child: Text('Chhattisgarhi (cg) : ${response2!.chhattisgarhi}',
+                        child: Text('Chhattisgarhi (cg) : ${Result!.chhattisgarhi}',
                           style: GoogleFonts.lato(fontSize: 20,
                               fontStyle: FontStyle.italic, color: Colors.black ),),
                       ),
                       Container(
                         padding: EdgeInsets.symmetric(vertical: 8),
-                        child: Text('Part of speech : ${response2!.partOfSpeech}',
+                        child: Text('Part of speech : ${Result!.partOfSpeech}',
                           style: GoogleFonts.lato(fontSize: 20,
                               fontStyle: FontStyle.italic, color: Colors.black ),),
                       ),
                       Container(
                         padding: EdgeInsets.symmetric(vertical: 8),
-                        child: Text('Meaning : ${response2!.meaning}',
+                        child: Text('Meaning : ${Result!.meaning}',
                           style: GoogleFonts.lato(fontSize: 20,
                               fontStyle: FontStyle.italic, color: Colors.black ),),
                       ),

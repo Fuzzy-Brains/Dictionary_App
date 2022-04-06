@@ -42,11 +42,11 @@ class InternetChecker{
   checkConnection(BuildContext context) async{
     listener = DataConnectionChecker().onStatusChange.listen((status) {
       switch (status){
-        // case DataConnectionStatus.connected:
-        //   InternetStatus = "Connected to the Internet";
-        //   contentmessage = "Connected to the Internet";
-        //   _showDialog(InternetStatus,contentmessage,context);
-        //   break;
+        case DataConnectionStatus.connected:
+          InternetStatus = "Connected to the Internet";
+          contentmessage = "Connected to the Internet";
+          // _showDialog(InternetStatus,contentmessage,context);
+          break;
         case DataConnectionStatus.disconnected:
           InternetStatus = "You are disconnected from the Internet. ";
           contentmessage = "Please check your internet connection";
