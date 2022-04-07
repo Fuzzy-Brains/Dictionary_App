@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
@@ -8,6 +9,7 @@ import 'package:dictionary_app/models/response.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../InternetChecker.dart';
 import '../constants.dart';
@@ -26,8 +28,11 @@ class NotificationView extends StatefulWidget {
 class _NotificationViewState extends State<NotificationView> {
 
   // String _word = 'word';
-  Response2? Result;
-  bool _loading = true;
+  Response2? Result = Response2(english: '', hindi: '', chhattisgarhi: '',
+      partOfSpeech: '', meaning: '');
+  bool _loading = false;
+  Timer? timer;
+  SharedPreferences? s;
 
   @override
   initState() {
